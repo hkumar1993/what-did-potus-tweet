@@ -14,7 +14,7 @@ const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || env.ACCESS_TOKEN_
 
 class TwitterHelper {
     constructor() {
-        this.latestTweet = {};
+        this.latestTweet = null;
         this.auth_token = null;
     }
 
@@ -69,7 +69,7 @@ class TwitterHelper {
     getLatestTweet() {
         const authToken = this.auth_token;
         return new Promise((resolve, reject) => {
-            const req = request('https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=potus&count=1', {
+            const req = request('https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=realDonaldTrump&count=1', {
                 headers: {
                     'Authorization': `Bearer ${authToken}`,
                 }
@@ -103,7 +103,7 @@ class TwitterHelper {
         });
     }
 
-    getTweet() {
+    getTweetHelper() {
         let promise = Promise.resolve();
         if (!this.auth_token) {
             promise = this.authenticate()
@@ -112,13 +112,25 @@ class TwitterHelper {
                     return Promise.resolve();
                 });
         }
-        return promise.then(() => this.getLatestTweet());
+        return promise
+            .then(() => this.getLatestTweet())
+            .then((res) => {
+                this.latestTweet = res;
+                return res;
+            });
     }
 
-
+    getTweet() {
+        let promise = Promise.resolve(this.latestTweet);
+        if (!this.latestTweet) {
+            promise = this.getTweetHelper()
+        }
+        return promise;
+    }
 
 }
 
 const twitterHelper = new TwitterHelper();
+setInterval(() => twitterHelper.getTweetHelper(), 60000);
 
 module.exports = twitterHelper;
