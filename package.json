@@ -1,0 +1,23 @@
+{
+  "name": "what-did-potus-tweet",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hkumar1993/what-did-potus-tweet.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hkumar1993/what-did-potus-tweet/issues"
+  },
+  "homepage": "https://github.com/hkumar1993/what-did-potus-tweet#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}

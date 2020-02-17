@@ -1,13 +1,22 @@
 const http = require('http');
-const hostname = '127.0.0.1';
-const port = 8888;
+const path = require('path');
+const express = require('express');
+const twitterHelper = require('./twitter-helper');
 
-const server = http.createServer((req, res) => {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-    res.end('Hello World\n');
+const app = express();
+
+const staticPath = path.join(__dirname, '../frontend');
+app.use(express.static(staticPath));
+
+app.get('/latest_tweet', (req, res, next) => {
+    try {
+        const response = twitterHelper.getTweet();
+        return res.status(200).json('{}');
+    } catch (e) {
+        return res.status(404).json(`{ error: ${e}}`);
+    }
 });
 
-server.listen(port, hostname, () => {
-    console.log(`Server running at http://${hostname}:${port}/`);
+app.listen(3000, function () {
+    console.log('listening');
 });
