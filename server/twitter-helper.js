@@ -58,7 +58,7 @@ class TwitterHelper {
             });
 
             req.on('error', (error) => {
-                console.error(error)
+                reject(error);
             })
 
             req.write(data);
@@ -67,16 +67,52 @@ class TwitterHelper {
     }
 
     getLatestTweet() {
+        const authToken = this.auth_token;
+        return new Promise((resolve, reject) => {
+            const req = request('https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=potus&count=1', {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                }
+            }, function(res) {
+                if (res.statusCode !== 200) {
+                    return reject({ statusCode: res.statusCode, message: res.statusMessage });
+                }
+                // holds all chunks
+                const chunks = [];
 
+                res.on('data', (chunk) => {
+                    chunks.push(chunk);
+                });
+
+                res.on('end', () => {
+                    try {
+                        const responseBody = Buffer.concat(chunks);
+                        const responseJson = JSON.parse(responseBody.toString());
+                        return resolve(responseJson);
+                    } catch (e) {
+                        return reject({ statusCode: 400, message: 'Invalid response' });
+                    }
+                });
+            });
+
+            req.on('error', (error) => {
+                reject(error);
+            })
+
+            req.end();
+        });
     }
 
     getTweet() {
+        let promise = Promise.resolve();
         if (!this.auth_token) {
-            this.authenticate()
-                .then((res) => console.log(res))
-                .catch((err) => console.log(err));
+            promise = this.authenticate()
+                .then((res) => {
+                    this.auth_token = res.access_token;
+                    return Promise.resolve();
+                });
         }
-        return ({});
+        return promise.then(() => this.getLatestTweet());
     }
 
 
